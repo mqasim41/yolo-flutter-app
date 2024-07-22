@@ -19,7 +19,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.ultralytics.ultralytics_yolo.predict.Predictor;
 
 import java.util.concurrent.ExecutionException;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CameraPreview {
     public final static Size CAMERA_PREVIEW_SIZE = new Size(640, 480);
@@ -30,6 +31,7 @@ public class CameraPreview {
     private Activity activity;
     private PreviewView mPreviewView;
     private boolean busy = false;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public CameraPreview(Context context) {
         this.context = context;
@@ -45,8 +47,8 @@ public class CameraPreview {
                 cameraProvider = cameraProviderFuture.get();
                 bindPreview(facing);
             } catch (ExecutionException | InterruptedException e) {
-                // No errors need to be handled for this Future.
-                // This should never be reached.
+                // Handle the error properly.
+                e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(context));
     }
@@ -68,10 +70,10 @@ public class CameraPreview {
                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                             .setTargetAspectRatio(AspectRatio.RATIO_4_3)
                             .build();
-            imageAnalysis.setAnalyzer(Runnable::run, imageProxy -> {
+            imageAnalysis.setAnalyzer(executor, imageProxy -> {
                 predictor.predict(imageProxy, facing == CameraSelector.LENS_FACING_FRONT);
 
-                //clear stream for next image
+                // Clear stream for next image
                 imageProxy.close();
             });
 
@@ -98,6 +100,6 @@ public class CameraPreview {
     }
 
     public void setScaleFactor(double factor) {
-        cameraControl.setZoomRatio((float)factor);
+        cameraControl.setZoomRatio((float) factor);
     }
 }

@@ -1,5 +1,6 @@
 import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -49,23 +50,26 @@ class _MyAppState extends State<MyApp> {
                                     predictor.loadModel(useGpu: true);
                                   },
                                 ),
-                                StreamBuilder<double?>(
-                                  stream: predictor.inferenceTime,
-                                  builder: (context, snapshot) {
-                                    final inferenceTime = snapshot.data;
+                                Visibility(
+                                  visible: true,
+                                  child: StreamBuilder<double?>(
+                                    stream: predictor.inferenceTime,
+                                    builder: (context, snapshot) {
+                                      final inferenceTime = snapshot.data;
 
-                                    return StreamBuilder<double?>(
-                                      stream: predictor.fpsRate,
-                                      builder: (context, snapshot) {
-                                        final fpsRate = snapshot.data;
+                                      return StreamBuilder<double?>(
+                                        stream: predictor.fpsRate,
+                                        builder: (context, snapshot) {
+                                          final fpsRate = snapshot.data;
 
-                                        return Times(
-                                          inferenceTime: inferenceTime,
-                                          fpsRate: fpsRate,
-                                        );
-                                      },
-                                    );
-                                  },
+                                          return Times(
+                                            inferenceTime: inferenceTime,
+                                            fpsRate: fpsRate,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
                             );
@@ -129,7 +133,7 @@ class _MyAppState extends State<MyApp> {
     //   format: Format.coreml,
     //   modelPath: modelPath,
     // );
-    final modelPath = await _copy('assets/yolov8n_int8.tflite');
+    final modelPath = await _copy('assets/yolov5nu_int8.tflite');
     final metadataPath = await _copy('assets/metadata.yaml');
     final model = LocalYoloModel(
       id: '',
