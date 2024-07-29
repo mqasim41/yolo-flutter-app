@@ -9,6 +9,7 @@
 
 struct DetectedObject {
     cv::Rect_<float> rect;
+    float rotation;
     int index;
     float confidence;
 };

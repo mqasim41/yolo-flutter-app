@@ -126,7 +126,7 @@ public class MethodCallHandler implements MethodChannel.MethodCallHandler {
         String type = (String) model.get("type");
         String task = (String) model.get("task");
         String format = (String) model.get("format");
-        if (Objects.equals(task, "detect")) {
+        if (Objects.equals(task, "obb")) {
             if (Objects.equals(format, "tflite")) {
                 predictor = new TfliteDetector(context);
             }
@@ -193,6 +193,7 @@ public class MethodCallHandler implements MethodChannel.MethodCallHandler {
                     float height = obj[3] * heightDp;
                     float confidence = obj[4];
                     int index = (int) obj[5];
+                    float rotation = obj[6];
                     String label = index < predictor.labels.size() ? predictor.labels.get(index) : "";
 
                     objectMap.put("x", x);
@@ -202,6 +203,7 @@ public class MethodCallHandler implements MethodChannel.MethodCallHandler {
                     objectMap.put("confidence", confidence);
                     objectMap.put("index", index);
                     objectMap.put("label", label);
+                    objectMap.put("rotation",rotation);
 
                     objects.add(objectMap);
                 }
@@ -249,7 +251,7 @@ public class MethodCallHandler implements MethodChannel.MethodCallHandler {
         Object numItemsObject = call.argument("numItems");
         if (numItemsObject != null) {
             final int numItems = (int) numItemsObject;
-            ((Detector) predictor).setNumItemsThreshold(numItems);
+            ((Detector) predictor).setNumItemsThreshold(30);
         }
     }
 
@@ -298,6 +300,7 @@ public class MethodCallHandler implements MethodChannel.MethodCallHandler {
                     float height = obj[3] * newHeight;
                     float confidence = obj[4];
                     int index = (int) obj[5];
+                    float rotation = obj[6];
                     String label = index < predictor.labels.size() ? predictor.labels.get(index) : "";
 
                     objectMap.put("x", x);
@@ -307,6 +310,7 @@ public class MethodCallHandler implements MethodChannel.MethodCallHandler {
                     objectMap.put("confidence", confidence);
                     objectMap.put("index", index);
                     objectMap.put("label", label);
+                    objectMap.put("rotation",rotation);
 
                     objects.add(objectMap);
                 }

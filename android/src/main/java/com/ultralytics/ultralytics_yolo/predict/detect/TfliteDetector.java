@@ -1,6 +1,8 @@
 package com.ultralytics.ultralytics_yolo.predict.detect;
 
 import static com.ultralytics.ultralytics_yolo.CameraPreview.CAMERA_PREVIEW_SIZE;
+import android.util.Log;
+
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -38,7 +40,7 @@ public class TfliteDetector extends Detector {
     static {
         System.loadLibrary("ultralytics");
     }
-
+    private static final String TAG = "OBB"; 
     private static final long FPS_INTERVAL_MS = 1000; // Update FPS every 1000 milliseconds (1 second)
     private static final int NUM_BYTES_PER_CHANNEL = 4;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -173,6 +175,7 @@ public class TfliteDetector extends Detector {
         }
 
         int[] outputShape = interpreter.getOutputTensor(0).shape();
+        Log.d(TAG, "output[" + interpreter.getOutputTensorCount() + "][" + 1 + "] = ");
         outputShape2 = outputShape[1];
         outputShape3 = outputShape[2];
         output = new float[outputShape2][outputShape3];
@@ -248,17 +251,19 @@ public class TfliteDetector extends Detector {
     private float[][] runInference() {
         if (interpreter != null) {
             interpreter.runForMultipleInputsOutputs(inputArray, outputMap);
-
+    
             ByteBuffer byteBuffer = (ByteBuffer) outputMap.get(0);
             if (byteBuffer != null) {
                 byteBuffer.rewind();
+                
 
                 for (int j = 0; j < outputShape2; ++j) {
                     for (int k = 0; k < outputShape3; ++k) {
                         output[j][k] = byteBuffer.getFloat();
+                        
                     }
                 }
-
+                
                 return postprocess(output, outputShape3, outputShape2, (float) confidenceThreshold,
                         (float) iouThreshold, numItemsThreshold, numClasses);
             }

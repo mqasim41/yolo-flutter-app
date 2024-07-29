@@ -6,11 +6,13 @@ import androidx.annotation.Keep;
 
 public class DetectedObject {
     public final Float confidence;
+    public final Float rotation;
     public final RectF boundingBox;
     public final int index;
     public final String label;
 
-    public DetectedObject(final Float confidence, final RectF boundingBox, final int index, final String label) {
+    public DetectedObject(final Float confidence, final RectF boundingBox, final int index, final float rotation, final String label) {
+        this.rotation = rotation;
         this.confidence = confidence;
         this.boundingBox = boundingBox;
         this.index = index;
@@ -35,6 +37,10 @@ public class DetectedObject {
     @Keep
     public String getLabel() {
         return label;
+    }
+    @Keep
+    public Float getRotation() {
+        return rotation;
     }
 }
 

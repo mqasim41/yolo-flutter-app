@@ -22,17 +22,8 @@ static void qsort_descent_inplace(std::vector<DetectedObject> &objects, int left
         }
     }
 
-    //     #pragma omp parallel sections
-    {
-        //         #pragma omp section
-        {
-            if (left < j) qsort_descent_inplace(objects, left, j);
-        }
-        //         #pragma omp section
-        {
-            if (i < right) qsort_descent_inplace(objects, i, right);
-        }
-    }
+    if (left < j) qsort_descent_inplace(objects, left, j);
+    if (i < right) qsort_descent_inplace(objects, i, right);
 }
 
 static void qsort_descent_inplace(std::vector<DetectedObject> &objects) {
@@ -47,8 +38,7 @@ static float intersection_area(const DetectedObject &a, const DetectedObject &b)
     return inter.area();
 }
 
-static void nms_sorted_bboxes(const std::vector<DetectedObject> &objects, std::vector<int> &picked,
-                              float nms_threshold) {
+static void nms_sorted_bboxes(const std::vector<DetectedObject> &objects, std::vector<int> &picked, float nms_threshold) {
     picked.clear();
 
     const int n = objects.size();
@@ -68,7 +58,6 @@ static void nms_sorted_bboxes(const std::vector<DetectedObject> &objects, std::v
             // intersection over union
             float inter_area = intersection_area(a, b);
             float union_area = areas[i] + areas[picked[j]] - inter_area;
-            // float IoU = inter_area / union_area
             if (inter_area / union_area > nms_threshold)
                 keep = 0;
         }
@@ -132,7 +121,7 @@ Java_com_ultralytics_ultralytics_1yolo_predict_detect_TfliteDetector_postprocess
             float dy = vec[1][i];
             float dw = vec[2][i];
             float dh = vec[3][i];
-
+            float rotation = vec[19][i];
             DetectedObject obj;
             obj.rect.x = dx;
             obj.rect.y = dy;
@@ -140,6 +129,7 @@ Java_com_ultralytics_ultralytics_1yolo_predict_detect_TfliteDetector_postprocess
             obj.rect.height = dh;
             obj.index = class_index;
             obj.confidence = class_score;
+            obj.rotation = rotation;
 
             proposals.push_back(obj);
         }
@@ -169,7 +159,7 @@ Java_com_ultralytics_ultralytics_1yolo_predict_detect_TfliteDetector_postprocess
         objects[i].rect.height = (y1 - y0);
     }
 
-    //return 2-dimension array [detected_box][6(x, y, width, height, conf, class)]
+    // return 2-dimension array [detected_box][7(x, y, width, height, conf, class, rotation)]
     jobjectArray objArray;
     jclass floatArray = env->FindClass("[F");
     if (floatArray == NULL)
@@ -179,18 +169,20 @@ Java_com_ultralytics_ultralytics_1yolo_predict_detect_TfliteDetector_postprocess
     if (objArray == NULL)
         return NULL;
     for (int i = 0; i < objects.size(); i++) {
+
         int index = objects[i].index;
         float x = objects[i].rect.x;
         float y = objects[i].rect.y;
         float width = objects[i].rect.width;
         float height = objects[i].rect.height;
         float confidence = objects[i].confidence;
+        float rotation = objects[i].rotation;
 
-        float boxres[6] = {x, y, width, height, confidence, (float) index};
-        jfloatArray iarr = env->NewFloatArray((jsize) 6);
+        float boxres[7] = {x, y, width, height, confidence, (float) index, rotation};
+        jfloatArray iarr = env->NewFloatArray((jsize) 7);
         if (iarr == NULL)
             return NULL;
-        env->SetFloatArrayRegion(iarr, 0, 6, boxres);
+        env->SetFloatArrayRegion(iarr, 0, 7, boxres);
         env->SetObjectArrayElement(objArray, i, iarr);
         env->DeleteLocalRef(iarr);
     }

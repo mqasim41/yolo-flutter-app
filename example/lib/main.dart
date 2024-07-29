@@ -1,5 +1,4 @@
 import 'dart:io' as io;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -133,11 +132,11 @@ class _MyAppState extends State<MyApp> {
     //   format: Format.coreml,
     //   modelPath: modelPath,
     // );
-    final modelPath = await _copy('assets/yolov5nu_int8.tflite');
+    final modelPath = await _copy('assets/yolov8n-obb_int8.tflite');
     final metadataPath = await _copy('assets/metadata.yaml');
     final model = LocalYoloModel(
       id: '',
-      task: Task.detect,
+      task: Task.obb,
       format: Format.tflite,
       modelPath: modelPath,
       metadataPath: metadataPath,

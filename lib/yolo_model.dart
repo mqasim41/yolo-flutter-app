@@ -15,6 +15,9 @@ enum Task {
   /// Object Detection task.
   detect('detect'),
 
+  // ignore: public_member_api_docs
+  obb('obb'),
+
   /// Pose estimation task.
   pose('pose');
 

@@ -4,6 +4,7 @@ import 'dart:ui';
 class DetectedObject {
   /// Creates a [DetectedObject].
   DetectedObject({
+    required this.rotation,
     required this.confidence,
     required this.boundingBox,
     required this.index,
@@ -22,6 +23,7 @@ class DetectedObject {
       ),
       index: json['index'] as int,
       label: json['label'] as String,
+      rotation: json['rotation'] as double,
     );
   }
 
@@ -36,4 +38,7 @@ class DetectedObject {
 
   /// The label of the detection.
   final String label;
+
+  /// the rotation of the bounding box
+  final double rotation;
 }

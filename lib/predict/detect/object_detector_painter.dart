@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:ultralytics_yolo/predict/detect/detected_object.dart';
 
 /// A painter used to draw the detected objects on the screen.
-
 class ObjectDetectorPainter extends CustomPainter {
   /// Creates a [ObjectDetectorPainter].
   ObjectDetectorPainter(
@@ -32,21 +31,29 @@ class ObjectDetectorPainter extends CustomPainter {
       final bottom = detectedObject.boundingBox.bottom;
       final width = detectedObject.boundingBox.width;
       final height = detectedObject.boundingBox.height;
+      final rotation = detectedObject.rotation;
 
       if (left.isNaN ||
           top.isNaN ||
           right.isNaN ||
           bottom.isNaN ||
           width.isNaN ||
-          height.isNaN) return;
+          height.isNaN ||
+          rotation.isNaN) return;
 
       final opacity = (detectedObject.confidence - 0.2) / (1.0 - 0.2) * 0.9;
 
       //
       // DRAW
-      // Rect
+      // Rect with rotation
       final index = detectedObject.index % colors.length;
       final color = colors[index];
+
+      canvas.save();
+      canvas.translate(left + width / 2, top + height / 2);
+      canvas.rotate(rotation);
+      canvas.translate(-left - width / 2, -top - height / 2);
+
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(left, top, width, height),
@@ -54,6 +61,8 @@ class ObjectDetectorPainter extends CustomPainter {
         ),
         borderPaint..color = color.withOpacity(opacity),
       );
+
+      canvas.restore();
 
       // Label
       final builder = ui.ParagraphBuilder(
